@@ -22,13 +22,25 @@ namespace server.Controllers
             var profile = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profile == null) return NotFound(new { message = "Không tìm thấy hồ sơ." });
 
-            // Lấy thêm thông tin tên và SĐT từ bảng Users
-            var user = await _context.Users.Select(u => new { u.Id, u.FullName, u.PhoneNumber, u.IsPremium })
-                                           .FirstOrDefaultAsync(u => u.Id == userId);
+            // Kiểm tra người đang xem có phải là Premium không
+            var currentViewerId = int.Parse(User.FindFirst("UserId")?.Value!);
+            var viewer = await _context.Users.FindAsync(currentViewerId);
+            bool canSeeContact = (viewer != null && viewer.IsPremium) || currentViewerId == userId;
 
-            return Ok(new { Profile = profile, UserInfo = user });
+            var workerUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            return Ok(new
+            {
+                Profile = profile,
+                UserInfo = new
+                {
+                    workerUser?.FullName,
+                    // Ẩn SĐT nếu không đủ quyền
+                    PhoneNumber = canSeeContact ? workerUser?.PhoneNumber : "Liên hệ Admin để xem",
+                    IsPremiumViewer = viewer?.IsPremium ?? false
+                }
+            });
         }
-
         // 2. CẬP NHẬT HỒ SƠ (Chỉ cho phép chính chủ sửa)
         [Authorize]
         [HttpPost("update")]
@@ -39,12 +51,12 @@ namespace server.Controllers
             if (currentUserId != profile.UserId.ToString()) return Forbid();
 
             var existing = await _context.Profiles.FirstOrDefaultAsync(p => p.UserId == profile.UserId);
-            
-            if (existing == null) 
+
+            if (existing == null)
             {
                 _context.Profiles.Add(profile);
             }
-            else 
+            else
             {
                 existing.Skills = profile.Skills;
                 existing.Age = profile.Age;
@@ -78,7 +90,8 @@ namespace server.Controllers
             var currentOwnerId = int.Parse(User.FindFirst("UserId")?.Value!);
             var owner = await _context.Users.FindAsync(currentOwnerId);
 
-            var result = suggestions.Select(p => new {
+            var result = suggestions.Select(p => new
+            {
                 p.UserId,
                 p.Avatar,
                 p.Skills,

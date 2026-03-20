@@ -15,7 +15,7 @@ namespace server.Controllers
 
         // 1. AI CŨNG XEM ĐƯỢC: Danh sách các gói dịch vụ (Để chào mời mua)
         [HttpGet]
-        public async Task<IActionResult> GetPackages() 
+        public async Task<IActionResult> GetPackages()
         {
             var packages = await _context.ServicePackages.ToListAsync();
             return Ok(packages);
@@ -37,7 +37,6 @@ namespace server.Controllers
         [HttpPost("buy/{packageId}")]
         public async Task<IActionResult> BuyPackage(int packageId)
         {
-            // Lấy UserId từ Token
             var userIdClaim = User.FindFirst("UserId")?.Value;
             if (userIdClaim == null) return Unauthorized();
             int userId = int.Parse(userIdClaim);
@@ -45,23 +44,21 @@ namespace server.Controllers
             var user = await _context.Users.FindAsync(userId);
             var package = await _context.ServicePackages.FindAsync(packageId);
 
-            if (user == null || package == null) 
-                return NotFound(new { message = "Người dùng hoặc Gói dịch vụ không tồn tại." });
+            if (user == null || package == null)
+                return NotFound(new { message = "Dữ liệu không tồn tại." });
 
-            // LOGIC THANH TOÁN: (Ở đây bạn có thể tích hợp VNPay/Momo sau này)
-            // Hiện tại chúng ta giả định thanh toán luôn thành công:
-            
-            user.IsPremium = true; 
-            // Bạn có thể lưu thêm ngày hết hạn nếu muốn: user.PremiumExpiry = DateTime.Now.AddDays(package.DurationDays);
+            // Kích hoạt Premium
+            user.IsPremium = true;
+            // Ghi chú: Bạn nên thêm cột PremiumExpiry vào bảng User để quản lý ngày hết hạn
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { 
-                message = $"Chúc mừng! Bạn đã kích hoạt thành công gói {package.PackageName}. " +
-                          $"Bây giờ bạn có thể xem thông tin liên hệ của các ứng viên." 
+            return Ok(new
+            {
+                message = $"Thành công! Gói {package.PackageName} đã kích hoạt.",
+                isPremium = true
             });
         }
-
         // 4. CHỈ ADMIN: Xóa gói dịch vụ
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
