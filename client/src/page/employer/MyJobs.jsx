@@ -38,7 +38,7 @@ const MyJobs = () => {
     <div className="max-w-6xl mx-auto px-4 py-10 font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">
+          <h1 className="text-3xl font-bold text-slate-900">
             Quản lý tin tuyển dụng
           </h1>
           <p className="text-slate-500 font-medium">
@@ -76,7 +76,7 @@ const MyJobs = () => {
                   <span className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">
                     {job.serviceType}
                   </span>
-                  
+
                   <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-lg font-bold">
                     {job.salary.toLocaleString()} đ
                   </span>
@@ -85,7 +85,7 @@ const MyJobs = () => {
 
               <div className="flex items-center gap-3">
                 <Link
-                  to={`/jobs?id=${job.id}`}
+                  to={`/job-detail?id=${job.id}`}
                   className="..."
                   title="Xem trên web"
                 >

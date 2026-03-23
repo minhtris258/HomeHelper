@@ -44,6 +44,7 @@ namespace server.Services
                 url,
                 createdAt = notification.CreatedAt
             });
+            await _hubContext.Clients.All.SendAsync("UpdateAdminStats");
         }
     }
 }

@@ -26,6 +26,7 @@ D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-net472
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.Build.Locator.dll
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.deps.json
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll
+D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll.config
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.runtimeconfig.json
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Newtonsoft.Json.dll
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\System.Collections.Immutable.dll
@@ -43,7 +44,6 @@ D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcor
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\tr\System.CommandLine.resources.dll
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\zh-Hans\System.CommandLine.resources.dll
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\zh-Hant\System.CommandLine.resources.dll
-D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\BuildHost-netcore\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll.config
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\appsettings.Development.json
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\appsettings.json
 D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\server.staticwebassets.endpoints.json

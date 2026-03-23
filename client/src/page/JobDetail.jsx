@@ -15,12 +15,14 @@ import {
   CheckCircle,
   Phone,
   AlertTriangle,
-  X,
   Users,
   Calendar,
 } from "lucide-react";
 import api from "../api/axios";
-import Modal from "../components/Modal"; // Đảm bảo đường dẫn này đúng với cấu trúc thư mục của bạn
+import Modal from "../components/Modal";
+// 1. Import Toastify
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const JobDetail = () => {
   const [searchParams] = useSearchParams();
@@ -30,12 +32,8 @@ const JobDetail = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  // Trạng thái cho Success Modal (Ứng tuyển thành công)
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [companyHotline, setCompanyHotline] = useState("");
-
-  // Trạng thái cho Report Modal (Tố cáo)
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportData, setReportData] = useState({
     reason: "Lừa đảo",
@@ -53,6 +51,7 @@ const JobDetail = () => {
         setJob(response.data);
       } catch (error) {
         console.error("Lỗi tải chi tiết:", error);
+        toast.error("Không thể tải thông tin công việc.");
       } finally {
         setLoading(false);
       }
@@ -64,8 +63,8 @@ const JobDetail = () => {
   const handleApply = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Vui lòng đăng nhập!");
-      navigate("/login");
+      toast.warn("Vui lòng đăng nhập để ứng tuyển!", { position: "top-right" });
+      setTimeout(() => navigate("/login"), 1500);
       return;
     }
 
@@ -74,15 +73,18 @@ const JobDetail = () => {
       const res = await api.post("/Application", { jobId: parseInt(jobId) });
       setCompanyHotline(res.data.hotline || "1900 1234");
       setShowSuccessModal(true);
-      setIsApplied(true); // Đánh dấu đã ứng tuyển thành công để lộ địa chỉ
+      setIsApplied(true);
+      // Thông báo Toast song song với Modal thành công
+      toast.success("Gửi đơn ứng tuyển thành công!");
     } catch (error) {
-      alert(error.response?.data?.message || "Lỗi ứng tuyển");
+      toast.error(
+        error.response?.data?.message || "Lỗi hệ thống khi ứng tuyển.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Hàm lấy tên thành phố
   const getCityOnly = (fullAddress) => {
     if (!fullAddress) return "";
     const parts = fullAddress.split(",");
@@ -93,8 +95,8 @@ const JobDetail = () => {
   const handleOpenReport = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Vui lòng đăng nhập để thực hiện tố cáo!");
-      navigate("/login");
+      toast.warn("Vui lòng đăng nhập để thực hiện tố cáo!");
+      setTimeout(() => navigate("/login"), 1500);
       return;
     }
     setShowReportModal(true);
@@ -103,7 +105,7 @@ const JobDetail = () => {
   const handleSendReport = async (e) => {
     e.preventDefault();
     if (!reportData.description) {
-      alert("Vui lòng nhập chi tiết nội dung tố cáo.");
+      toast.warning("Vui lòng nhập chi tiết nội dung tố cáo.");
       return;
     }
 
@@ -114,11 +116,11 @@ const JobDetail = () => {
         reason: reportData.reason,
         description: reportData.description,
       });
-      alert("Gửi tố cáo thành công! Ban quản trị sẽ sớm xem xét.");
+      toast.success("Gửi tố cáo thành công! Ban quản trị sẽ sớm xem xét.");
       setShowReportModal(false);
       setReportData({ reason: "Lừa đảo", description: "" });
     } catch (error) {
-      alert("Lỗi gửi tố cáo. Vui lòng thử lại sau.");
+      toast.error("Gửi tố cáo thất bại. Vui lòng thử lại sau.");
     } finally {
       setReporting(false);
     }
@@ -127,13 +129,13 @@ const JobDetail = () => {
   if (!jobId)
     return (
       <div className="py-20 text-center font-bold">
-        Vui lòng chọn một công việc để xem.
+        Vui lòng chọn một công việc.
       </div>
     );
   if (loading)
     return (
       <div className="py-20 text-center animate-pulse text-slate-400 font-medium italic">
-        Đang tải chi tiết công việc...
+        Đang tải chi tiết...
       </div>
     );
   if (!job)
@@ -144,38 +146,37 @@ const JobDetail = () => {
     );
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20 font-sans">
-      {/* SUCCESS MODAL (Ứng tuyển thành công) */}
+    <div className="bg-slate-50 min-h-screen pb-20 font-sans text-left">
+      {/* 2. Thêm ToastContainer để hiện thông báo ở góc phải */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      {/* SUCCESS MODAL */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-300">
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle size={48} />
             </div>
-            <h3 className="text-2xl font-black text-slate-800 mb-2">
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">
               Ứng tuyển thành công!
             </h3>
             <p className="text-slate-500 text-sm mb-8 font-medium">
-              Hệ thống đã ghi nhận hồ sơ của bạn. Liên hệ ngay Hotline hỗ trợ
-              kết nối nhanh nhất:
+              Hệ thống đã ghi nhận hồ sơ của bạn. Liên hệ Hotline hỗ trợ:
             </p>
-
             <div className="bg-blue-50 border-2 border-blue-100 rounded-3xl p-6 mb-8 group">
-              <p className="text-[10px] font-black text-blue-400 uppercase tracking-[3px] mb-1">
+              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[3px] mb-1">
                 Hotline hỗ trợ
               </p>
               <a
                 href={`tel:${companyHotline}`}
-                className="text-3xl font-black text-blue-700 flex items-center justify-center gap-3"
+                className="text-3xl font-bold text-blue-700 flex items-center justify-center gap-3"
               >
-                <Phone className="fill-blue-700" size={24} />
-                {companyHotline}
+                <Phone className="fill-blue-700" size={24} /> {companyHotline}
               </a>
             </div>
-
             <button
               onClick={() => setShowSuccessModal(false)}
-              className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-black transition-all"
+              className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-black transition-all"
             >
               ĐÃ HIỂU
             </button>
@@ -183,7 +184,7 @@ const JobDetail = () => {
         </div>
       )}
 
-      {/* REPORT MODAL (Tố cáo) */}
+      {/* REPORT MODAL */}
       {showReportModal && (
         <Modal
           isOpen={showReportModal}
@@ -196,12 +197,10 @@ const JobDetail = () => {
               <div className="text-sm">
                 <p className="font-bold">Lưu ý quan trọng:</p>
                 <p className="font-medium text-red-700">
-                  Tố cáo sai sự thật có thể dẫn đến việc tài khoản của bạn bị
-                  khóa vĩnh viễn.
+                  Tố cáo sai sự thật có thể dẫn đến việc tài khoản bị khóa.
                 </p>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">
                 Lý do tố cáo
@@ -215,21 +214,17 @@ const JobDetail = () => {
               >
                 <option value="Lừa đảo">Lừa đảo / Yêu cầu đặt cọc tiền</option>
                 <option value="Sai sự thật">
-                  Thông tin công việc không đúng thực tế
+                  Thông tin không đúng thực tế
                 </option>
                 <option value="Thái độ xấu">
-                  Chủ nhà có thái độ, hành vi không chuẩn mực
-                </option>
-                <option value="Nội dung cấm">
-                  Chứa nội dung đồi trụy, vi phạm pháp luật
+                  Chủ nhà có hành vi không chuẩn mực
                 </option>
                 <option value="Khác">Lý do khác...</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">
-                Mô tả chi tiết vi phạm
+                Mô tả chi tiết
               </label>
               <textarea
                 value={reportData.description}
@@ -237,18 +232,16 @@ const JobDetail = () => {
                   setReportData({ ...reportData, description: e.target.value })
                 }
                 rows="5"
-                placeholder="Vui lòng cung cấp bằng chứng hoặc chi tiết vi phạm..."
+                placeholder="Cung cấp bằng chứng hoặc chi tiết vi phạm..."
                 required
                 className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 transition font-medium text-sm"
               />
             </div>
-
             <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={reporting}
-                className={`flex-1 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2
-                  ${reporting ? "bg-slate-400" : "bg-red-500 hover:bg-red-600"}`}
+                className={`flex-1 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 ${reporting ? "bg-slate-400" : "bg-red-500 hover:bg-red-600"}`}
               >
                 {reporting ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -268,7 +261,7 @@ const JobDetail = () => {
         </Modal>
       )}
 
-      {/* Giao diện Header */}
+      {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-6">
         <Link
           to="/jobs"
@@ -281,15 +274,13 @@ const JobDetail = () => {
       <div className="max-w-5xl mx-auto px-4">
         {/* Card thông tin chính */}
         <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 p-8 md:p-10 mb-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 bg-blue-600 text-white px-6 py-2 rounded-bl-3xl font-black text-xs uppercase tracking-tighter">
+          <div className="absolute top-0 right-0 bg-blue-600 text-white px-6 py-2 rounded-bl-3xl font-bold text-xs uppercase tracking-tighter">
             Đang tuyển dụng
           </div>
-
-          <h1 className="text-xl md:text-3xl font-extrabold text-slate-900 mb-8 leading-tight pr-20">
+          <h1 className="text-xl md:text-3xl font-extrabold text-slate-900 mb-8 pr-20">
             {job.title}
           </h1>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 text-left">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100">
                 <DollarSign size={28} />
@@ -303,22 +294,19 @@ const JobDetail = () => {
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 text-left">
+            <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100">
                 <MapPin size={28} />
               </div>
               <div>
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                  Khu vực làm việc
+                  Khu vực
                 </p>
                 <p className="font-bold text-slate-700 text-sm">
-                  {/* Chỉ hiện địa chỉ cụ thể khi đã bấm Ứng tuyển */}
                   {isApplied ? job.location : getCityOnly(job.location)}
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100">
                 <Briefcase size={28} />
@@ -328,11 +316,10 @@ const JobDetail = () => {
                   Hình thức
                 </p>
                 <p className="font-bold text-slate-700 text-sm">
-                  {job.jobType}
+                  {job.jobType === "Hourly" ? "Làm theo giờ" : job.jobType}
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100">
                 <GraduationCap size={28} />
@@ -348,13 +335,12 @@ const JobDetail = () => {
             </div>
           </div>
 
-          {/* Các nút hành động */}
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleApply}
               disabled={submitting}
-              className={`flex-[3] text-white font-bold py-5 rounded-[20px] flex items-center justify-center gap-3 shadow-xl transition-all
-                ${submitting ? "bg-slate-400" : "bg-[#3a1a7e] hover:bg-[#2d1463]"}`}
+              className={`flex-[3] text-white font-bold py-5 rounded-[20px] flex items-center justify-center gap-3 shadow-xl transition-all ${submitting ? "bg-slate-400" : "bg-[#3a1a7e] hover:bg-[#2d1463]"}`}
             >
               {submitting ? (
                 <Loader2 size={22} className="animate-spin" />
@@ -364,30 +350,27 @@ const JobDetail = () => {
                 </>
               )}
             </button>
-            <button className="flex-1 px-8 py-5 bg-slate-100 hover:bg-white text-slate-700 hover:text-red-500 font-bold rounded-[20px] flex items-center justify-center gap-2 border-2 border-transparent hover:border-red-100 group transition-all">
+            <button className="flex-1 px-8 py-5 bg-slate-100 hover:bg-white text-slate-700 hover:text-red-500 font-bold rounded-[20px] flex items-center justify-center gap-2 border-2 border-transparent hover:border-red-100 transition-all group">
               <Heart
                 size={22}
                 className="group-hover:fill-red-500 transition-all"
-              />
+              />{" "}
               Lưu
             </button>
             <button
               onClick={handleOpenReport}
               className="px-6 py-5 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-[20px] flex items-center justify-center gap-2 transition-all border border-red-100"
             >
-              <AlertTriangle size={22} />
-              Tố cáo
+              <AlertTriangle size={22} /> Tố cáo
             </button>
           </div>
         </div>
 
-        {/* Thông tin chi tiết mở rộng */}
-        <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 p-8 md:p-10">
-          <h2 className="text-2xl font-black text-slate-800 mb-8 border-l-[6px] border-blue-600 pl-5 leading-none">
+        {/* Detailed Info */}
+        <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 p-8 md:p-10 text-left">
+          <h2 className="text-2xl font-bold text-slate-800 mb-8 border-l-[6px] border-blue-600 pl-5 leading-none">
             Mô tả chi tiết
           </h2>
-
-          {/* Thông tin thời gian, giới tính, tuổi */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
             <div className="flex items-center gap-3">
               <Clock className="text-blue-600" size={24} />
@@ -415,7 +398,7 @@ const JobDetail = () => {
               <Calendar className="text-blue-600" size={24} />
               <div>
                 <p className="text-xs text-slate-400 font-bold uppercase">
-                  Yêu cầu độ tuổi
+                  Độ tuổi
                 </p>
                 <p className="font-bold text-slate-700 text-sm">
                   {job.ageReq || "Không yêu cầu"}
@@ -423,16 +406,13 @@ const JobDetail = () => {
               </div>
             </div>
           </div>
-
-          <div className="text-slate-600 leading-relaxed whitespace-pre-line text-base font-medium italic">
-            {job.description ||
-              "Nhà tuyển dụng chưa cung cấp mô tả chi tiết cho bài đăng này."}
+          <div className="text-slate-600 leading-relaxed whitespace-pre-line text-base font-medium">
+            {job.description || "Nhà tuyển dụng chưa cung cấp mô tả chi tiết."}
           </div>
-
           <div className="mt-12 p-8 bg-gradient-to-br from-blue-50 to-white rounded-[24px] border border-blue-100 shadow-inner">
             <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2 text-lg uppercase tracking-tighter">
-              <Sparkles size={20} className="text-blue-600" />
-              Cam kết từ hệ thống HomeHelper
+              <Sparkles size={20} className="text-blue-600" /> Cam kết từ
+              HomeHelper
             </h4>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-700 font-bold text-sm">
               <li>• Tin tuyển dụng đã được xác thực uy tín.</li>

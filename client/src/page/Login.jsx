@@ -63,6 +63,7 @@ const Login = () => {
       <ToastContainer />
       
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+       
         <div className="text-center mb-10">
           <Link to="/" className="text-3xl font-extrabold tracking-tighter inline-block mb-2 uppercase italic">
             Home<span className="text-blue-600">Helper</span>
@@ -70,7 +71,7 @@ const Login = () => {
           <p className="text-slate-500 text-sm italic font-medium">Chào mừng bạn quay trở lại!</p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5 p-2" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-tight">Tên đăng nhập hoặc Email</label>
             <div className="relative">

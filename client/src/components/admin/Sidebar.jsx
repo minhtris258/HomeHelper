@@ -14,19 +14,17 @@ import {
   Menu,
   Wrench,
   Package, // Icon mới cho quản lý gói
-  CreditCard
+  CreditCard,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
-  
+
   // Danh sách Menu chia theo nhóm để Admin dễ quản lý
   const navGroups = [
     {
       label: "Tổng quan",
-      items: [
-        { name: "Bảng điều khiển", icon: LayoutDashboard, to: "/admin" },
-      ]
+      items: [{ name: "Bảng điều khiển", icon: LayoutDashboard, to: "/admin" }],
     },
     {
       label: "Quản lý cốt lõi",
@@ -35,7 +33,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Quản lý Bài đăng", icon: ClipboardList, to: "jobs" },
         { name: "Người giúp việc", icon: Briefcase, to: "workers" },
         { name: "Khách hàng", icon: Users, to: "homeowners" },
-      ]
+      ],
     },
     {
       label: "Hệ thống & Gói cước",
@@ -44,28 +42,31 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { name: "Lịch sử thanh toán", icon: CreditCard, to: "payments" },
         { name: "Dịch vụ hệ thống", icon: Wrench, to: "services" },
         { name: "Báo cáo vi phạm", icon: ShieldAlert, to: "reports" },
-      ]
+      ],
     },
     {
       label: "Tài khoản",
       items: [
         { name: "Hồ sơ Admin", icon: UserCircle, to: "profile" },
         { name: "Cài đặt", icon: Settings, to: "settings" },
-      ]
-    }
+      ],
+    },
   ];
 
   const handleLogout = () => {
-    if (window.confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống quản trị?")) {
+    if (
+      window.confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống quản trị?")
+    ) {
       localStorage.clear();
       navigate("/login");
-      window.location.reload(); 
+      window.location.reload();
     }
   };
 
   const linkClasses =
     "flex items-center px-4 py-2.5 rounded-xl transition-all duration-200 text-blue-100 hover:bg-white/10 hover:text-white group text-sm mb-1";
-  const activeClasses = "bg-white text-blue-700 font-bold shadow-lg shadow-blue-900/20";
+  const activeClasses =
+    "bg-white text-blue-700 font-bold shadow-lg shadow-blue-900/20";
 
   return (
     <aside
@@ -81,11 +82,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             to="/"
             className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-800 hover:bg-blue-900 transition-all border border-blue-400/30 group"
           >
-            <Home size={18} className="group-hover:scale-110 transition-transform" />
+            <Home
+              size={18}
+              className="group-hover:scale-110 transition-transform"
+            />
           </Link>
 
           <div className="flex flex-col select-none">
-            <span className="text-xl font-black tracking-tighter leading-none">
+            <span className="text-xl font-bold tracking-tighter leading-none">
               Home<span className="text-blue-300">Helper</span>
             </span>
             <span className="text-[10px] uppercase tracking-[2px] font-bold text-blue-200 mt-1">
@@ -103,7 +107,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <nav className="flex-1 p-4 overflow-y-auto custom-scrollbar">
         {navGroups.map((group, idx) => (
           <div key={idx} className="mb-6">
-            <h3 className="px-4 text-[10px] font-black uppercase tracking-widest text-blue-300/60 mb-2">
+            <h3 className="px-4 text-[10px] font-bold uppercase tracking-widest text-blue-300/60 mb-2">
               {group.label}
             </h3>
             {group.items.map((item) => (
@@ -120,9 +124,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               >
                 <item.icon className="h-4 w-4 mr-3" />
                 <span className="flex-1">{item.name}</span>
-                
+
                 {item.badge && (
-                  <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black animate-pulse">
+                  <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold animate-pulse">
                     NEW
                   </span>
                 )}

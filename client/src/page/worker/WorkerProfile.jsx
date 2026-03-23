@@ -212,7 +212,7 @@ const WorkerProfile = () => {
 
           <button
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:bg-slate-400"
+            className="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:bg-slate-400"
           >
             <Save size={20} />{" "}
             {loading ? "ĐANG LƯU DỮ LIỆU..." : "LƯU TẤT CẢ THÔNG TIN"}

@@ -79,7 +79,7 @@ const Register = () => {
           <button
             type="button"
             onClick={() => setRole('Worker')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
               role === 'Worker' ? 'bg-white text-green-600 shadow-md' : 'text-slate-500'
             }`}
           >
@@ -88,7 +88,7 @@ const Register = () => {
           <button
             type="button"
             onClick={() => setRole('Homeowner')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
               role === 'Homeowner' ? 'bg-white text-purple-600 shadow-md' : 'text-slate-500'
             }`}
           >
@@ -96,7 +96,7 @@ const Register = () => {
           </button>
         </div>
 
-        <form className="space-y-4 relative z-10" onSubmit={handleRegister}>
+        <form className="space-y-4 relative z-10 p-2" onSubmit={handleRegister}>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
@@ -144,7 +144,7 @@ const Register = () => {
 
           <button 
             disabled={loading}
-            className={`w-full text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 shadow-lg uppercase tracking-widest text-xs mt-4 ${
+            className={`w-full text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 shadow-lg uppercase tracking-widest text-xs mt-4 ${
               role === 'Worker' ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'
             } disabled:opacity-50`}
           >
@@ -154,7 +154,7 @@ const Register = () => {
         </form>
 
         <p className="text-center mt-6 text-sm text-slate-500 font-medium">
-          Đã có tài khoản? <Link to="/login" className="text-blue-600 font-black hover:underline uppercase">Đăng nhập</Link>
+          Đã có tài khoản? <Link to="/login" className="text-blue-600 font-bold hover:underline uppercase">Đăng nhập</Link>
         </p>
       </div>
     </div>

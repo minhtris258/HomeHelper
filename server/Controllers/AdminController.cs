@@ -30,11 +30,11 @@ public class AdminController : ControllerBase
         await _context.SaveChangesAsync();
 
         string status = user.IsLocked ? "bị khóa" : "đã được mở khóa";
-        
+
         // Gửi thông báo cho User
         await _notificationService.SendNotification(
-            userId, 
-            "Trạng thái tài khoản", 
+            userId,
+            "Trạng thái tài khoản",
             $"Tài khoản của bạn {status} bởi Quản trị viên."
         );
 
@@ -56,8 +56,8 @@ public class AdminController : ControllerBase
 
         // Gửi thông báo cho Chủ nhà
         await _notificationService.SendNotification(
-            ownerId, 
-            "Tin đăng bị xóa", 
+            ownerId,
+            "Tin đăng bị xóa",
             $"Tin '{title}' đã bị xóa do vi phạm quy định của hệ thống."
         );
 
@@ -65,16 +65,42 @@ public class AdminController : ControllerBase
     }
 
     // 3. THEO DÕI HỆ THỐNG: Thống kê nhanh
-    [HttpGet("stats")]
-    public async Task<IActionResult> GetStats()
+   [HttpGet("stats")]
+public async Task<IActionResult> GetStats()
+{
+    // 1. Thống kê số lượng người dùng (VIP và Thường)
+    var totalUsers = await _context.Users.CountAsync();
+    var premiumUsers = await _context.Users.CountAsync(u => u.IsPremium == true);
+    var normalUsers = totalUsers - premiumUsers;
+
+    // 2. Thống kê báo cáo và công việc
+    var totalJobs = await _context.Jobs.CountAsync();
+    var pendingReports = await _context.Reports.CountAsync(r => r.Status == "Pending");
+
+    // 3. Tính tuổi trung bình từ bảng Profile
+    var userProfiles = await _context.Users
+        .Join(_context.Profiles, u => u.Id, p => p.UserId, (u, p) => new { u.Role, p.Age })
+        .Where(x => x.Age > 0)
+        .ToListAsync();
+
+    double avgAgeHomeowner = userProfiles.Where(x => x.Role == "Homeowner").Select(x => x.Age).DefaultIfEmpty(0).Average();
+    double avgAgeWorker = userProfiles.Where(x => x.Role == "Worker").Select(x => x.Age).DefaultIfEmpty(0).Average();
+
+    // Tính % VIP
+    double premiumPercentage = totalUsers > 0 ? (double)premiumUsers / totalUsers * 100 : 0;
+
+    return Ok(new
     {
-        var totalUsers = await _context.Users.CountAsync();
-        var totalJobs = await _context.Jobs.CountAsync();
-        var pendingReports = await _context.Reports.CountAsync(r => r.Status == "Pending");
-
-        return Ok(new { totalUsers, totalJobs, pendingReports });
-    }
-
+        totalUsers,
+        premiumUsers,
+        normalUsers,
+        totalJobs,
+        pendingReports,
+        avgAgeHomeowner = Math.Round(avgAgeHomeowner, 1),
+        avgAgeWorker = Math.Round(avgAgeWorker, 1),
+        premiumPercentage = Math.Round(premiumPercentage, 1)
+    });
+}
     [HttpGet("reports-summary")]
     public async Task<IActionResult> GetReportsSummary()
     {

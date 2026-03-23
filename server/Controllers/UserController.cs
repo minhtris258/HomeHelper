@@ -150,33 +150,28 @@ namespace server.Controllers
                 .ToListAsync();
             return Ok(pending);
         }
-        [Authorize(Roles = "Homeowner")]
-        [HttpPut("cancel-premium")]
-        public async Task<IActionResult> CancelPremium()
+        [Authorize]
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var user = await _context.Users.FindAsync(int.Parse(userIdClaim!));
 
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound();
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.OldPassword, user.Password))
+                return BadRequest(new { message = "Mật khẩu cũ không chính xác!" });
 
-            // Hủy trạng thái Premium
-            user.IsPremium = false;
-            user.PremiumExpiry = null;
-
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _context.SaveChangesAsync();
 
-            // Gửi thông báo thông qua Service bạn đã viết trước đó
-            await _notificationService.SendNotification(
-                userId,
-                "Hủy gói thành công",
-                "Bạn đã hủy gói Premium thành công. Các đặc quyền đã bị gỡ bỏ."
-            );
-
-            return Ok(new { message = "Đã hủy gói thành công." });
+            return Ok(new { message = "Đổi mật khẩu thành công!" });
         }
 
+        // Thêm Class DTO này vào cuối file hoặc trong namespace Models
+        public class ChangePasswordRequest
+        {
+            public string OldPassword { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
         // Hàm tạo Token JWT
         private string CreateToken(User user)
         {
