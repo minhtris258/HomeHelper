@@ -7,10 +7,18 @@ const PostJob = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: "", description: "", jobType: "Full-time", 
-    serviceType: "Giúp việc gia đình", salary: "", location: ""
+    title: "",
+    description: "",
+    jobType: "Full-time",
+    serviceType: "Giúp việc gia đình",
+    salary: "",
+    location: "",
+    // Các trường mới
+    workingTime: "",
+    genderReq: "Không yêu cầu",
+    ageReq: "",
+    requiredSkills: "",
   });
-
   const handlePost = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -18,13 +26,21 @@ const PostJob = () => {
       await api.post("/Job", formData);
       alert("Đăng tin thành công!");
       navigate("/employer/my-jobs");
-    } catch (error) { alert("Lỗi đăng tin!"); }
-    finally { setLoading(false); }
+    } catch (error) {
+      alert("Lỗi đăng tin!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4">
-      <JobForm formData={formData} setFormData={setFormData} onSubmit={handlePost} loading={loading} />
+      <JobForm
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handlePost}
+        loading={loading}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using server.Data;
 using server.Models;
+using server.Services;
 
 namespace server.Controllers
 {
@@ -16,11 +17,12 @@ namespace server.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
-
-        public UserController(ApplicationDbContext context, IConfiguration configuration)
+        private readonly INotificationService _notificationService;
+        public UserController(ApplicationDbContext context, IConfiguration configuration, INotificationService notificationService)
         {
             _context = context;
             _configuration = configuration;
+            _notificationService = notificationService;
         }
 
         // 1. ĐĂNG KÝ: Mã hóa mật khẩu + Logic duyệt tài khoản
@@ -37,6 +39,7 @@ namespace server.Controllers
                 Username = request.Username,
                 Email = request.Email,
                 FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber,
                 Role = request.Role,
                 Password = BCrypt.Net.BCrypt.HashPassword(request.Password), // Mã hóa
                 IsApproved = (request.Role == "Worker" || request.Role == "Admin"),
@@ -65,7 +68,10 @@ namespace server.Controllers
 
             if (!user.IsApproved)
                 return BadRequest(new { message = "Tài khoản của bạn đang chờ phê duyệt!" });
-
+            if (user.IsLocked)
+            {
+                return BadRequest(new { message = "Tài khoản của bạn đã bị khóa do vi phạm chính sách." });
+            }
             var token = CreateToken(user);
 
             return Ok(new
@@ -73,24 +79,26 @@ namespace server.Controllers
                 token,
                 role = user.Role,
                 userId = user.Id,
-                fullName = user.FullName
+                fullName = user.FullName,
+                isPremium = user.IsPremium,
+                premiumExpiry = user.PremiumExpiry
             });
         }
         // 3. CẬP NHẬT THÔNG TIN LIÊN HỆ (Bảng User)
         [Authorize] // Phải đăng nhập mới được sửa
         [HttpPut("update-contact/{userId}")]
-        public async Task<IActionResult> UpdateContact(int userId, [FromBody] User updatedUser)
+        public async Task<IActionResult> UpdateContact(int userId, [FromBody] UpdateContactRequest request)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            // Chỉ cho phép người dùng tự sửa thông tin của chính mình (hoặc Admin)
             var currentUserId = User.FindFirst("UserId")?.Value;
             if (currentUserId != userId.ToString() && !User.IsInRole("Admin"))
                 return Forbid();
 
-            user.FullName = updatedUser.FullName;
-            user.PhoneNumber = updatedUser.PhoneNumber;
+            // Cập nhật các trường cho phép
+            user.FullName = request.FullName;
+            user.PhoneNumber = request.PhoneNumber;
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã cập nhật thông tin liên hệ!" });
@@ -141,6 +149,32 @@ namespace server.Controllers
                 .Where(u => !u.IsApproved && u.Role == "Homeowner")
                 .ToListAsync();
             return Ok(pending);
+        }
+        [Authorize(Roles = "Homeowner")]
+        [HttpPut("cancel-premium")]
+        public async Task<IActionResult> CancelPremium()
+        {
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            int userId = int.Parse(userIdClaim);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            // Hủy trạng thái Premium
+            user.IsPremium = false;
+            user.PremiumExpiry = null;
+
+            await _context.SaveChangesAsync();
+
+            // Gửi thông báo thông qua Service bạn đã viết trước đó
+            await _notificationService.SendNotification(
+                userId,
+                "Hủy gói thành công",
+                "Bạn đã hủy gói Premium thành công. Các đặc quyền đã bị gỡ bỏ."
+            );
+
+            return Ok(new { message = "Đã hủy gói thành công." });
         }
 
         // Hàm tạo Token JWT

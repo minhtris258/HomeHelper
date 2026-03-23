@@ -32,7 +32,7 @@ const Header = ({ toggleSidebar, setView }) => {
       </button>
 
       {/* Title */}
-      <h1 className="text-xl font-semibold text-gray-800 lg:ml-0 ml-4">
+      <h1 className="  text-gray-800 lg:ml-0 ml-4">
         Quản Lý 
       </h1>
 

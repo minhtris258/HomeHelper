@@ -49,7 +49,7 @@ const AdminLayout = () => {
                     Đây là nơi các component con (Dashboard, PatientManagement, v.v.)
                     tương ứng với các routes lồng nhau sẽ được render.
                 */}
-        <main className="flex-1 p-4 sm:p-6">
+        <main className="">
           <Outlet />
         </main>
       </div>

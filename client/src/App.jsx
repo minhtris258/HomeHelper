@@ -12,7 +12,7 @@ import SearchResults from "./page/SearchResults";
 import Pricing from "./page/Pricing"; // Trang mua gói cho Chủ nhà
 
 // Admin Pages
-import HomeownerManagement from "./page/admin/HomeownerManagement";
+import PendingManagement from "./page/admin/PedingManagement";
 import JobManagement from "./page/admin/JobManagement";
 import AdminPackageList from "./page/admin/AdminPackageList";   // Quản lý gói
 import AdminPackageCreate from "./page/admin/AdminPackageCreate"; // Tạo gói mới
@@ -31,6 +31,13 @@ import WorkerDashboard from "./page/worker/WorkerDashboard";
 // --- LAYOUTS ---
 import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import AdminReportManagement from "./page/admin/AdminReportManagement";
+import AdminDashboard from "./page/admin/AdminDashboard";
+import HomeownerManagement from "./page/admin/HomeownerManagement";
+import WorkerManagement from "./page/admin/WorkerManagement";
+import OwnerProfile from "./page/employer/OwnerProfile";
+import WorkerProfileDetail from "./page/employer/WorkerProfileDetail";
+
 
 const App = () => {
   return (
@@ -43,16 +50,19 @@ const App = () => {
           <Route path="register" element={<Register />} />
           <Route path="jobs" element={<SearchResults />} /> 
           <Route path="job-detail" element={<JobDetail />} />
-          <Route path="pricing" element={<Pricing />} /> {/* Chủ nhà vào đây xem gói */}
+          <Route path="packages" element={<Pricing />} /> {/* Chủ nhà vào đây xem gói */}
           <Route path="workers" element={<Home />} /> 
         </Route>
 
         {/* NHÓM 2: ADMIN (Quản trị hệ thống) */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<JobManagement />} />
-          <Route path="pending" element={<HomeownerManagement />} />
+          <Route index element={<AdminDashboard />} />
+          <Route path="pending" element={<PendingManagement />} />
           <Route path="jobs" element={<JobManagement />} />
-          
+          <Route path="reports" element={<AdminReportManagement />} />
+          <Route path="homeowners" element={<HomeownerManagement />} />
+          <Route path="workers" element={<WorkerManagement />} />
+
           {/* Quản lý gói dịch vụ cho Admin */}
           <Route path="packages" element={<AdminPackageList />} />
           <Route path="packages/create" element={<AdminPackageCreate />} />
@@ -65,6 +75,8 @@ const App = () => {
           <Route path="post-job" element={<PostJob />} />
           <Route path="edit-job/:id" element={<EditJob />} />
           <Route path="applications/:jobId" element={<JobApplications />} />
+          <Route path="profile" element={<OwnerProfile />} /> {/* Sử dụng OwnerProfile cho Employer */} 
+          <Route path="worker-profile/:userId" element={<WorkerProfileDetail />} /> {/* Xem hồ sơ chi tiết của Người giúp việc */}  
         </Route>
 
         {/* NHÓM 4: NGƯỜI GIÚP VIỆC (Worker) */}

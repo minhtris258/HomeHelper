@@ -3,6 +3,7 @@ using server.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
-
+builder.Services.AddSignalR();
+builder.Services.AddScoped<server.Services.INotificationService, server.Services.NotificationService>();
 builder.Services.AddAuthorization(); // Kích hoạt phân quyền
 // 1. Database & Controllers
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -32,13 +34,13 @@ builder.Services.AddControllers();
 
 // 2. KÍCH HOẠT SWAGGER (Thay cho AddOpenApi)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 
 // 3. CORS cho React
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod());
+        policy => policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 var app = builder.Build();
@@ -60,9 +62,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowReactApp");
 
+
 app.UseAuthentication(); // Ai là người đang truy cập? (Xác thực)
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

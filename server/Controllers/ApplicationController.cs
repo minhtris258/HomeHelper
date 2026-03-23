@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using server.Data;
 using server.Models;
+using server.Services;
 using System.Security.Claims;
 
 namespace server.Controllers
@@ -12,9 +13,14 @@ namespace server.Controllers
     public class ApplicationController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public ApplicationController(ApplicationDbContext context) { _context = context; }
+        private readonly INotificationService _notificationService;
 
-        // 1. NGƯỜI GIÚP VIỆC ỨNG TUYỂN (Chỉ dành cho Worker)
+        public ApplicationController(ApplicationDbContext context, INotificationService notificationService)
+        {
+            _context = context;
+            _notificationService = notificationService;
+        }
+
         [Authorize(Roles = "Worker")]
         [HttpPost]
         public async Task<IActionResult> Apply([FromBody] Application appRequest)
@@ -29,6 +35,9 @@ namespace server.Controllers
             if (existingApp != null)
                 return BadRequest(new { message = "Bạn đã ứng tuyển công việc này rồi!" });
 
+            var job = await _context.Jobs.FindAsync(appRequest.JobId);
+            if (job == null) return NotFound();
+
             var newApp = new Application
             {
                 JobId = appRequest.JobId,
@@ -40,15 +49,52 @@ namespace server.Controllers
             _context.Applications.Add(newApp);
             await _context.SaveChangesAsync();
 
-            // Trả về thông báo kèm Hotline công ty để hỗ trợ kết nối
-            return Ok(new
-            {
-                message = "Ứng tuyển thành công!",
-                hotline = "1900 1234", // Hotline cố định của hệ thống
-                instructions = "Vui lòng gọi Hotline để được hỗ trợ kết nối nhanh nhất với chủ nhà."
-            });
+            // 1. Thông báo cho Chủ nhà
+            await _notificationService.SendNotification(
+                job.OwnerId,
+                "Ứng tuyển mới",
+                $"Có ứng viên vừa ứng tuyển vào công việc: {job.Title}",
+                $"/manage-jobs/{job.Id}"
+            );
+
+            // 2. Thông báo cho Người ứng tuyển
+            await _notificationService.SendNotification(
+                workerId,
+                "Ứng tuyển thành công",
+                $"Bạn đã gửi hồ sơ ứng tuyển cho: {job.Title}"
+            );
+
+            return Ok(new { message = "Ứng tuyển thành công!" });
         }
-        // 2. CHỦ NHÀ XEM DANH SÁCH ỨNG VIÊN (Của một Job cụ thể)
+
+        [Authorize(Roles = "Homeowner")]
+        [HttpPut("status/{appId}")]
+        public async Task<IActionResult> UpdateStatus(int appId, [FromBody] string newStatus)
+        {
+            var app = await _context.Applications
+                .Include(a => a.Job)
+                .FirstOrDefaultAsync(a => a.Id == appId);
+
+            if (app == null) return NotFound();
+
+            var currentUserId = User.FindFirst("UserId")?.Value;
+            if (app.Job?.OwnerId.ToString() != currentUserId) return Forbid();
+
+            app.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            // Thông báo cho Người giúp việc về kết quả
+            string statusMsg = newStatus == "Accepted" ? "được CHẤP NHẬN" : "bị TỪ CHỐI";
+            await _notificationService.SendNotification(
+                app.WorkerId,
+                "Kết quả ứng tuyển",
+                $"Hồ sơ của bạn cho công việc '{app.Job?.Title}' đã {statusMsg}.",
+                "/my-applications"
+            );
+
+            return Ok(new { message = $"Đã cập nhật trạng thái: {newStatus}" });
+        }
+
         [Authorize(Roles = "Homeowner,Admin")]
         [HttpGet("job/{jobId}")]
         public async Task<IActionResult> GetByJob(int jobId)
@@ -60,11 +106,9 @@ namespace server.Controllers
             if (currentUserIdClaim == null) return Unauthorized();
             int currentUserId = int.Parse(currentUserIdClaim);
 
-            // Kiểm tra quyền: Chỉ chủ nhà của bài đăng hoặc Admin mới được xem
             if (job.OwnerId != currentUserId && !User.IsInRole("Admin"))
                 return Forbid();
 
-            // KIỂM TRA GÓI DỊCH VỤ: Lấy thông tin IsPremium của chủ nhà hiện tại
             var owner = await _context.Users.FindAsync(currentUserId);
             bool isPremium = owner?.IsPremium ?? false;
 
@@ -80,16 +124,15 @@ namespace server.Controllers
                           app.Status,
                           WorkerName = user.FullName,
                           WorkerId = user.Id,
-                          // LOGIC ẨN THÔNG TIN: Nếu không phải Premium thì ẩn nội dung
-                          PhoneNumber = isPremium ? user.PhoneNumber : "******** (Mua gói để xem)",
-                          Email = isPremium ? user.Email : "Ẩn (Liên hệ mua gói)",
-                          IsLocked = !isPremium // Gửi cờ này để Frontend hiện nút "Mua gói"
+                          PhoneNumber = isPremium ? user.PhoneNumber : "********",
+                          Email = isPremium ? user.Email : "Ẩn",
+                          IsLocked = !isPremium
                       })
                 .ToListAsync();
 
             return Ok(applications);
         }
-        // 3. NGƯỜI GIÚP VIỆC XEM CÁC CÔNG VIỆC MÌNH ĐÃ ỨNG TUYỂN
+
         [Authorize(Roles = "Worker")]
         [HttpGet("my-applications")]
         public async Task<IActionResult> GetMyApplications()
@@ -113,25 +156,6 @@ namespace server.Controllers
                 .ToListAsync();
 
             return Ok(myApps);
-        }
-
-        // 4. CHỦ NHÀ DUYỆT/TỪ CHỐI ỨNG VIÊN
-        [Authorize(Roles = "Homeowner")]
-        [HttpPut("status/{appId}")]
-        public async Task<IActionResult> UpdateStatus(int appId, [FromBody] string newStatus)
-        {
-            var app = await _context.Applications.FindAsync(appId);
-            if (app == null) return NotFound();
-
-            // Kiểm tra quyền (Chủ nhà của Job đó mới được duyệt)
-            var job = await _context.Jobs.FindAsync(app.JobId);
-            var currentUserId = User.FindFirst("UserId")?.Value;
-            if (job?.OwnerId.ToString() != currentUserId) return Forbid();
-
-            app.Status = newStatus; // Accepted, Rejected...
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Đã cập nhật trạng thái đơn ứng tuyển thành: {newStatus}" });
         }
     }
 }

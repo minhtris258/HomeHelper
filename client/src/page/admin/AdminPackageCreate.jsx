@@ -17,8 +17,8 @@ const AdminPackageCreate = () => {
 
   return (
     <div className="max-w-2xl p-8 mx-auto">
-      <div className="bg-white p-8 rounded-[32px] border shadow-sm">
-        <h2 className="text-2xl font-black mb-6">Thêm gói dịch vụ mới</h2>
+      <div className="bg-white p-8 rounded-[32px]  shadow-sm">
+        <h2 className="text-2xl font-bold mb-6">Thêm gói dịch vụ mới</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-bold mb-2">Tên gói</label>
@@ -38,11 +38,11 @@ const AdminPackageCreate = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold mb-2">Mô tả gói</label>
+            <label className="block text-sm font-bold mb-2 ">Mô tả gói</label>
             <textarea className="w-full p-4 bg-slate-50 border rounded-2xl outline-none" rows="4"
               onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
-          <button className="w-full bg-blue-600 text-white font-black py-4 rounded-2xl">XÁC NHẬN TẠO</button>
+          <button className="w-full bg-blue-600 text-white font-medium py-4 rounded-2xl">XÁC NHẬN TẠO</button>
         </form>
       </div>
     </div>

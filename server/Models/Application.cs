@@ -7,5 +7,6 @@ namespace server.Models
         public int WorkerId { get; set; } // Ai ứng tuyển
         public DateTime ApplyDate { get; set; } = DateTime.Now;
         public string Status { get; set; } = "Pending"; // Pending, Accepted, Rejected
+      public virtual Job? Job { get; set; }
     }
 }

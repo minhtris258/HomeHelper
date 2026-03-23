@@ -1,140 +1,119 @@
 import React, { useEffect, useState } from "react";
-import { UserCheck, Mail, Calendar, Search, RefreshCw, AlertCircle } from "lucide-react";
+import { Users, Star, Lock, Unlock, Loader2, ShieldCheck, Clock, XCircle } from "lucide-react";
 import api from "../../api/axios";
 
 const HomeownerManagement = () => {
-  const [pendingUsers, setPendingUsers] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // 1. Hàm lấy danh sách chờ duyệt
-  const fetchPending = async () => {
+  const fetchOwners = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/User/pending");
-      setPendingUsers(response.data);
-      setError(null);
+      // Gọi API lấy danh sách Homeowner
+      const res = await api.get("/admin/users-by-role?role=Homeowner");
+      setOwners(res.data);
     } catch (err) {
-      setError("Không thể tải danh sách tài khoản chờ duyệt.");
-      console.error(err);
+      console.error("Lỗi tải dữ liệu:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 2. Hàm phê duyệt tài khoản
-  const handleApprove = async (userId, fullName) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn duyệt tài khoản của ${fullName}?`)) return;
+  useEffect(() => { fetchOwners(); }, []);
 
+  const handleToggleLock = async (userId) => {
     try {
-      await api.put(`/User/approve/${userId}`);
-      alert(`Đã phê duyệt thành công tài khoản: ${fullName}`);
-      // Cập nhật lại danh sách sau khi duyệt
-      fetchPending();
-    } catch (err) {
-      alert(err.response?.data?.message || "Có lỗi xảy ra khi phê duyệt.");
+      await api.put(`/admin/users/${userId}/lock`);
+      fetchOwners(); // Reload dữ liệu sau khi khóa/mở khóa
+    } catch (err) { 
+      alert("Lỗi khi thay đổi trạng thái tài khoản!"); 
     }
   };
 
-  useEffect(() => {
-    fetchPending();
-  }, []);
-
   return (
-    <div className="p-6 max-w-7xl mx-auto min-h-screen bg-slate-50">
-      {/* Header */}
+    <div className="p-8 text-left">
       <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <UserCheck className="text-blue-600" />
-            Duyệt tài khoản Chủ nhà
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Danh sách những người đăng ký vai trò Homeowner đang chờ Admin xác nhận.
-          </p>
-        </div>
-        <button 
-          onClick={fetchPending}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition"
-        >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          Làm mới
-        </button>
+        <h2 className="text-2xl font-bold flex items-center gap-2 uppercase tracking-tight">
+          <Users className="text-indigo-600" size={28} /> Quản lý Chủ nhà ({owners.length})
+        </h2>
       </div>
 
-      {/* Main Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-slate-500 font-medium">Đang tải dữ liệu...</p>
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-700">
-          <AlertCircle size={20} />
-          <p>{error}</p>
-        </div>
-      ) : pendingUsers.length === 0 ? (
-        <div className="bg-white border border-dashed border-slate-300 rounded-2xl py-20 text-center">
-          <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserCheck className="text-slate-400" size={32} />
-          </div>
-          <h3 className="text-lg font-bold text-slate-700">Tuyệt vời!</h3>
-          <p className="text-slate-500">Hiện tại không có tài khoản nào đang chờ duyệt.</p>
+        <div className="flex justify-center py-20">
+          <Loader2 className="animate-spin text-indigo-600" size={40}/>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Họ và Tên</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Liên hệ</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Ngày đăng ký</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {pendingUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-blue-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
-                        {user.fullName?.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800">{user.fullName}</p>
-                        <p className="text-xs text-slate-500">ID: #{user.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Mail size={14} className="text-slate-400" />
-                        {user.email}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Calendar size={14} className="text-slate-400" />
-                      {new Date(user.createdAt).toLocaleDateString("vi-VN")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleApprove(user.id, user.fullName)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md shadow-blue-100 transition-all active:scale-95"
-                    >
-                      Phê duyệt
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500">
-            Tổng cộng: {pendingUsers.length} tài khoản đang chờ xử lý
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {owners.map(u => (
+            <div key={u.id} className="bg-white p-6 rounded-[32px]  shadow-sm relative overflow-hidden">
+              {/* Badge Premium */}
+              {u.isPremium && (
+                <div className="absolute top-0 right-0 bg-amber-400 text-white px-3 py-1 rounded-bl-xl text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                  <Star size={10} fill="white"/> PREMIUM
+                </div>
+              )}
+              
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold text-lg border border-indigo-100">
+                  {u.fullName?.charAt(0).toUpperCase() || "U"}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 flex items-center gap-1.5">
+                    {u.fullName} 
+                    {u.isApproved ? (
+                       <ShieldCheck size={16} className="text-blue-500" title="Đã duyệt" />
+                    ) : (
+                       <XCircle size={16} className="text-slate-300" title="Chưa duyệt" />
+                    )}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-bold">{u.email}</p>
+                </div>
+              </div>
+
+              {/* Thông tin bổ sung: Ngày tạo & Phê duyệt */}
+              <div className="grid grid-cols-2 gap-2 mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                    <Clock size={10}/> Tham gia
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-600">
+                    {new Date(u.createdAt).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+                <div className="flex flex-col border-l border-slate-200 pl-3">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase">Hồ sơ</span>
+                  <span className={`text-[11px] font-bold ${u.isApproved ? 'text-blue-600' : 'text-amber-500'}`}>
+                    {u.isApproved ? "Đã xác thực" : "Chờ duyệt"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center border-t border-slate-50 pt-4 mt-2">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Trạng thái</span>
+                  <span className={`text-[10px] font-bold uppercase ${u.isLocked ? 'text-red-500' : 'text-green-500'}`}>
+                    {u.isLocked ? "Tài khoản bị khóa" : "Đang hoạt động"}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => handleToggleLock(u.id)} 
+                  className={`p-2 rounded-xl transition-all shadow-sm ${u.isLocked ? 'bg-green-50 hover:bg-green-100' : 'bg-red-50 hover:bg-red-100'}`}
+                >
+                  {u.isLocked ? (
+                    <Unlock size={20} className="text-green-600" title="Mở khóa" />
+                  ) : (
+                    <Lock size={20} className="text-red-500" title="Khóa tài khoản" />
+                  )}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && owners.length === 0 && (
+        <div className="text-center py-20 bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+          <p className="text-slate-400 font-bold italic uppercase">Không tìm thấy dữ liệu chủ nhà.</p>
         </div>
       )}
     </div>

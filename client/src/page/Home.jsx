@@ -33,7 +33,7 @@ const Home = () => {
         <Hero />
         <HomeSearchBar />
 
-        <section className="max-w-7xl mx-auto px-4 py-16">
+        <section className="max-w-7xl mx-auto px-4 py-16 container">
           <div className="flex justify-between items-end mb-8">
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">

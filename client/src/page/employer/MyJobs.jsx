@@ -64,7 +64,7 @@ const MyJobs = () => {
               key={job.id}
               className="bg-white border border-slate-100 p-6 rounded-[24px] shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row justify-between items-center gap-6"
             >
-              <div className="flex-1">
+              <div className="">
                 <h3 className="text-xl font-bold text-slate-800 mb-2">
                   {job.title}
                 </h3>
@@ -76,6 +76,7 @@ const MyJobs = () => {
                   <span className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">
                     {job.serviceType}
                   </span>
+                  
                   <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-lg font-bold">
                     {job.salary.toLocaleString()} đ
                   </span>

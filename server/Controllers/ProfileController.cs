@@ -34,10 +34,10 @@ namespace server.Controllers
                 Profile = profile,
                 UserInfo = new
                 {
-                    workerUser?.FullName,
-                    // Ẩn SĐT nếu không đủ quyền
-                    PhoneNumber = canSeeContact ? workerUser?.PhoneNumber : "Liên hệ Admin để xem",
-                    IsPremiumViewer = viewer?.IsPremium ?? false
+                    fullName = workerUser?.FullName, // Đổi thành fullName
+                    phoneNumber = canSeeContact ? workerUser?.PhoneNumber : "Mua gói để xem",
+                    isPremiumViewer = viewer?.IsPremium ?? false
+                    
                 }
             });
         }
@@ -63,6 +63,7 @@ namespace server.Controllers
                 existing.Gender = profile.Gender;
                 existing.Bio = profile.Bio;
                 existing.Address = profile.Address;
+                existing.Experience = profile.Experience;
                 existing.Avatar = profile.Avatar;
                 existing.UpdatedAt = DateTime.Now;
             }

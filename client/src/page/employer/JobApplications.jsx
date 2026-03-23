@@ -72,7 +72,7 @@ const JobApplications = () => {
           
           {/* Thông báo cho chủ nhà chưa mua gói */}
           {applications.some(a => a.isLocked) && (
-            <Link to="/pricing" className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-2xl border border-amber-100 hover:bg-amber-100 transition-all">
+            <Link to="/packages" className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-2xl border border-amber-100 hover:bg-amber-100 transition-all">
               <Crown size={18} className="text-amber-500" />
               <span className="text-xs font-black uppercase">Nâng cấp để xem liên hệ</span>
             </Link>
@@ -91,14 +91,18 @@ const JobApplications = () => {
                     {app.workerName?.charAt(0) || "W"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-black text-slate-800 truncate">
-                        {app.workerName} 
-                      </h3>
-                      <Link to={`/worker-profile/${app.workerId}`} className="text-slate-400 hover:text-blue-600 transition-colors">
-                        <ExternalLink size={18} />
-                      </Link>
-                    </div>
+  <div className="flex items-center gap-3 mb-2">
+    <h3 className="text-xl font-black text-slate-800 truncate">
+      {app.workerName} 
+    </h3>
+    {/* Thêm nút Xem hồ sơ ngay cạnh tên hoặc ở phần thông tin */}
+    <Link 
+      to={`/employer/worker-profile/${app.workerId}`} 
+      className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-black hover:bg-blue-100 transition-all"
+    >
+      <User size={14} /> XEM HỒ SƠ CHI TIẾT
+    </Link>
+  </div>
 
                     {/* HIỂN THỊ CÓ ĐIỀU KIỆN DỰA TRÊN GÓI DỊCH VỤ */}
                     <div className="space-y-2">

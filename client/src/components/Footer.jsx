@@ -14,9 +14,9 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#0f172a] text-slate-400 py-16 px-4 mt-auto">
+    <footer className="bg-[#0f172a] text-slate-400 pt-16 px-4 mt-auto">
       <div className="max-w-[1440px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12 container">
           
           {/* Cột 1: Thương hiệu & Social */}
           <div className="lg:col-span-2">
@@ -98,7 +98,7 @@ const Footer = () => {
         <div className="h-px bg-slate-800 w-full mb-8"></div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 container">
           <p className="text-xs text-slate-500">
             © 2026 HomeHelper. Phát triển bởi đội ngũ đam mê công nghệ.
           </p>

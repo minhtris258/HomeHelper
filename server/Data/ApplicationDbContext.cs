@@ -12,5 +12,7 @@ namespace server.Data
         public DbSet<Application> Applications { get; set; }
         public DbSet<ServicePackage> ServicePackages { get; set; }
         public DbSet<Profile> Profiles { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }

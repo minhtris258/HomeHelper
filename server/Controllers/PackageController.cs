@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using server.Data;
 using server.Models;
+using server.Services; // Đảm bảo đã import namespace chứa INotificationService
 
 namespace server.Controllers
 {
@@ -11,9 +12,15 @@ namespace server.Controllers
     public class PackageController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public PackageController(ApplicationDbContext context) { _context = context; }
+        private readonly INotificationService _notificationService; // Thêm service thông báo
 
-        // 1. AI CŨNG XEM ĐƯỢC: Danh sách các gói dịch vụ (Để chào mời mua)
+        public PackageController(ApplicationDbContext context, INotificationService notificationService) 
+        { 
+            _context = context; 
+            _notificationService = notificationService; // Inject service qua constructor
+        }
+
+        // 1. AI CŨNG XEM ĐƯỢC: Danh sách các gói dịch vụ
         [HttpGet]
         public async Task<IActionResult> GetPackages()
         {
@@ -32,7 +39,6 @@ namespace server.Controllers
         }
 
         // 3. CHỈ CHỦ NHÀ: Mua gói dịch vụ
-        // Khi mua thành công, IsPremium của User sẽ thành true
         [Authorize(Roles = "Homeowner")]
         [HttpPost("buy/{packageId}")]
         public async Task<IActionResult> BuyPackage(int packageId)
@@ -49,16 +55,32 @@ namespace server.Controllers
 
             // Kích hoạt Premium
             user.IsPremium = true;
-            // Ghi chú: Bạn nên thêm cột PremiumExpiry vào bảng User để quản lý ngày hết hạn
+
+            // Nếu gói cũ vẫn còn hạn thì cộng dồn, nếu không thì tính từ hôm nay
+            DateTime startDate = (user.PremiumExpiry > DateTime.Now)
+                                 ? user.PremiumExpiry.Value
+                                 : DateTime.Now;
+
+            user.PremiumExpiry = startDate.AddDays(package.DurationDays);
 
             await _context.SaveChangesAsync();
+
+            // --- THÊM THÔNG BÁO TẠI ĐÂY ---
+            await _notificationService.SendNotification(
+                userId: userId,
+                title: "Thanh toán thành công",
+                content: $"Chúc mừng! Bạn đã kích hoạt thành công gói {package.PackageName}. Hạn dùng đến: {user.PremiumExpiry?.ToString("dd/MM/yyyy")}",
+                url: "/profile/membership" // Đường dẫn dẫn tới trang quản lý gói của user
+            );
 
             return Ok(new
             {
                 message = $"Thành công! Gói {package.PackageName} đã kích hoạt.",
-                isPremium = true
+                isPremium = true,
+                premiumExpiry = user.PremiumExpiry
             });
         }
+
         // 4. CHỈ ADMIN: Xóa gói dịch vụ
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
