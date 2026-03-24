@@ -2,18 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Text;
 using server.Hubs;
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 var builder = WebApplication.CreateBuilder(args);
 
-// --- TỐI ƯU LẤY KEY JWT (Tránh lỗi 500 nếu thiếu config) ---
-var jwtKey = builder.Configuration["Jwt:Key"] 
-             ?? builder.Configuration["Jwt__Key"] 
-             ?? "MinhTris25SecretKey_PhaiDaiTren32KyTu_123456"; // Key dự phòng
+// --- TỐI ƯU LẤY KEY JWT ---
+var jwtKey = builder.Configuration["Jwt:Key"]
+              ?? builder.Configuration["Jwt__Key"]
+              ?? "MinhTris25SecretKey_PhaiDaiTren32KyTu_123456";
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,18 +32,22 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<server.Services.INotificationService, server.Services.NotificationService>();
 builder.Services.AddAuthorization();
 
-// 1. Database - Sử dụng ConnectionString từ Azure
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+// --- 1. DATABASE: CHUYỂN SANG SQL SERVER ---
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                       ?? builder.Configuration["ConnectionStrings__DefaultConnection"];
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString)); 
+    options.UseSqlServer(connectionString, sqlServerOptions => 
+        sqlServerOptions.EnableRetryOnFailure(
+            maxRetryCount: 5, 
+            maxRetryDelay: TimeSpan.FromSeconds(30), 
+            errorNumbersToAdd: null)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 2. CORS - Thêm địa chỉ Azure vào nếu cần
+// --- 2. CORS ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -58,16 +59,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 3. Swagger luôn bật để bạn dễ dàng test trên Azure
+// --- 3. SWAGGER ---
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeHelper API V1");
-    c.RoutePrefix = "swagger"; 
+    c.RoutePrefix = "swagger";
 });
 
 app.UseCors("AllowReactApp");
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
