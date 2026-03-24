@@ -56,21 +56,30 @@ const Header = () => {
 
   // --- KẾT NỐI SIGNALR & LẤY THÔNG BÁO ---
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
 
-    // Lấy danh sách thông báo cũ từ Database qua API
-    const fetchNotifications = async () => {
-      try {
-        const res = await api.get("/Notification");
-        setNotifications(res.data);
-        setUnreadCount(res.data.filter((n) => !n.isRead).length);
-      } catch (err) {
-        console.error("Lỗi lấy thông báo:", err);
-      }
-    };
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get("/Notification");
+      
+      // KIỂM TRA VÀ ÉP KIỂU DỮ LIỆU AN TOÀN
+      // Nếu res.data là mảng thì dùng luôn, nếu không thì dùng mảng rỗng
+      const dataArray = Array.isArray(res.data) 
+        ? res.data 
+        : (res.data?.$values || []); // Hỗ trợ cả định dạng $values của .NET
 
-    fetchNotifications();
+      setNotifications(dataArray);
+      setUnreadCount(dataArray.filter((n) => !n.isRead).length);
+    } catch (err) {
+      console.error("Lỗi lấy thông báo:", err);
+      // Nếu lỗi, set về mảng rỗng để giao diện không bị crash
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  };
+
+  fetchNotifications();
 
     // Thiết lập kết nối Realtime
     const connection = new signalR.HubConnectionBuilder()
