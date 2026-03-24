@@ -83,7 +83,7 @@ const Header = () => {
 
     // Thiết lập kết nối Realtime
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(import.meta.env.VITE_NOTIFICATION_HUB_URL)
+      .withUrl("https://homehelperapi-fxdqcbesg9gyc0f3.southeastasia-01.azurewebsites.net/notificationHub")
       .withAutomaticReconnect()
       .build();
 
