@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 // 1. Import Toastify và file axios config của bạn
@@ -27,6 +27,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const connectionRef = useRef(null);
 
   // --- QUẢN LÝ THÔNG TIN USER ---
   useEffect(() => {
