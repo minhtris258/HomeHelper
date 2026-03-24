@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Text;
 using server.Hubs;
 
@@ -28,7 +29,7 @@ builder.Services.AddScoped<server.Services.INotificationService, server.Services
 builder.Services.AddAuthorization(); // Kích hoạt phân quyền
 // 1. Database & Controllers
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Đổi UseSqlite thành UseNpgsql
 
 builder.Services.AddControllers();
 

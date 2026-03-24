@@ -215,3 +215,5 @@ D:\User\Documents\workspace\HomeHelper\server\obj\Debug\net10.0\refint\server.dl
 D:\User\Documents\workspace\HomeHelper\server\obj\Debug\net10.0\server.pdb
 D:\User\Documents\workspace\HomeHelper\server\obj\Debug\net10.0\server.genruntimeconfig.cache
 D:\User\Documents\workspace\HomeHelper\server\obj\Debug\net10.0\ref\server.dll
+D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\Npgsql.dll
+D:\User\Documents\workspace\HomeHelper\server\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
