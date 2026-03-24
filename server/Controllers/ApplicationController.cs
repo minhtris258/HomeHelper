@@ -54,7 +54,7 @@ namespace server.Controllers
                 job.OwnerId,
                 "Ứng tuyển mới",
                 $"Có ứng viên vừa ứng tuyển vào công việc: {job.Title}",
-                $"/manage-jobs/{job.Id}"
+                $"/employer/applications/{job.Id}"
             );
 
             // 2. Thông báo cho Người ứng tuyển
@@ -89,7 +89,7 @@ namespace server.Controllers
                 app.WorkerId,
                 "Kết quả ứng tuyển",
                 $"Hồ sơ của bạn cho công việc '{app.Job?.Title}' đã {statusMsg}.",
-                "/my-applications"
+                "/worker/my-applications"
             );
 
             return Ok(new { message = $"Đã cập nhật trạng thái: {newStatus}" });

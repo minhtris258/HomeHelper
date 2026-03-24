@@ -69,8 +69,8 @@ namespace server.Controllers
             await _notificationService.SendNotification(
                 userId: userId,
                 title: "Thanh toán thành công",
-                content: $"Chúc mừng! Bạn đã kích hoạt thành công gói {package.PackageName}. Hạn dùng đến: {user.PremiumExpiry?.ToString("dd/MM/yyyy")}",
-                url: "/profile/membership" // Đường dẫn dẫn tới trang quản lý gói của user
+                content: $"Chúc mừng! Bạn đã kích hoạt thành công gói {package.PackageName}. Hạn dùng đến: {user.PremiumExpiry?.ToString("dd/MM/yyyy")}"
+                // Đường dẫn dẫn tới trang quản lý gói của user
             );
 
             return Ok(new
