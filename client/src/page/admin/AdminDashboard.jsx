@@ -42,18 +42,22 @@ const AdminDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchStats();
+ useEffect(() => {
+  fetchStats();
 
-    // Khởi tạo kết nối SignalR
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("https://homehelperapi-fxdqcbesg9gyc0f3.southeastasia-01.azurewebsites.net/notificationHub")
-      .withAutomaticReconnect()
-      .build();
+  // 1. Khởi tạo kết nối
+  const newConnection = new signalR.HubConnectionBuilder()
+    .withUrl(`${import.meta.env.VITE_API_URL}/notificationHub`, {
+      accessTokenFactory: () => localStorage.getItem('token') || "", // Tránh null
+    })
+    .withAutomaticReconnect()
+    .build();
 
-    connectionRef.current = newConnection;
+  connectionRef.current = newConnection;
 
-    const startConnection = async () => {
+  const startConnection = async () => {
+    // Chỉ start nếu trạng thái đang là Disconnected
+    if (newConnection.state === signalR.HubConnectionState.Disconnected) {
       try {
         await newConnection.start();
         console.log("SignalR Connected!");
@@ -63,14 +67,14 @@ const AdminDashboard = () => {
           fetchStats();
         });
       } catch (err) {
-        // Chỉ log lỗi nếu không phải lỗi do chủ động ngắt kết nối
         if (err.name !== "AbortError") {
           console.error("SignalR Connection Error: ", err);
         }
       }
-    };
+    }
+  };
 
-    startConnection();
+  startConnection();
 
     // Cleanup function: Chỉ đóng kết nối khi Component thực sự bị hủy
     return () => {

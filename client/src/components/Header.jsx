@@ -82,37 +82,44 @@ const Header = () => {
   fetchNotifications();
 
     // Thiết lập kết nối Realtime
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://homehelperapi-fxdqcbesg9gyc0f3.southeastasia-01.azurewebsites.net/notificationHub")
+   const connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${import.meta.env.VITE_API_URL}/notificationHub`, {
+        accessTokenFactory: () => localStorage.getItem("token"),
+      })
       .withAutomaticReconnect()
       .build();
+
+    connectionRef.current = connection;
 
     connection
       .start()
       .then(() => {
+        console.log("SignalR: Connected to Hub");
         connection.invoke("JoinUserGroup", userId);
 
         connection.on("ReceiveNotification", (data) => {
-          // 1. Thêm vào danh sách hiện tại
           setNotifications((prev) => [data, ...prev]);
-          // 2. Tăng số lượng chưa đọc
           setUnreadCount((prev) => prev + 1);
-          // 3. Hiển thị Toast Popup
+          
           toast.info(
-            <div>
+            <div className="cursor-pointer">
               <p className="font-bold text-sm">{data.title}</p>
               <p className="text-xs">{data.content}</p>
             </div>,
             {
               onClick: () => data.redirectUrl && navigate(data.redirectUrl),
-            },
+            }
           );
         });
       })
-      .catch((err) => console.error("SignalR Error: ", err));
+      .catch((err) => console.error("SignalR Connection Error: ", err));
 
+    // CLEANUP: Ngắt kết nối khi chuyển trang hoặc logout
     return () => {
-      if (connection) connection.stop();
+      if (connection) {
+        connection.stop();
+        console.log("SignalR: Connection Stopped");
+      }
     };
   }, [navigate]);
 
@@ -122,7 +129,7 @@ const Header = () => {
       await api.put("/Notification/read-all");
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
-      toast.success("Đã đánh dấu tất cả là đã đọc");
+      toast.success("Đã đọc tất cả thông báo");
     } catch (err) {
       console.error("Lỗi mark read:", err);
     }
@@ -130,6 +137,8 @@ const Header = () => {
 
   const handleLogout = () => {
     if (window.confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+      // Dừng kết nối trước khi xóa dữ liệu
+      if (connectionRef.current) connectionRef.current.stop();
       localStorage.clear();
       setUser(null);
       navigate("/");
