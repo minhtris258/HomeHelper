@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // URL Server của bạn
+  baseURL: import.meta.env.VITE_API_URL + '/api', // URL Server của bạn
 });
 
 // Tự động thêm Token vào Header nếu có trong localStorage
