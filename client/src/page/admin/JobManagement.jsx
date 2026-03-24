@@ -149,7 +149,7 @@ const JobManagement = () => {
                 </div>
 
                 {/* Dòng 2: Tiêu đề bài đăng */}
-                <h3 className="font-bold text-slate-800 text-xl mb-3 group-hover:text-blue-600 transition-colors">
+                <h3 className="font-bold text-slate-800 text-lg mb-3 group-hover:text-blue-600 transition-colors">
                   {job.title}
                 </h3>
 
@@ -159,14 +159,14 @@ const JobManagement = () => {
                     <DollarSign size={18} />
                     {job.salary.toLocaleString("vi-VN")} đ
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500 font-bold border border-slate-100 px-3 py-1.5 rounded-xl">
+                  <div className="flex items-center gap-2 text-slate-500 font-bold  px-3 py-1.5 rounded-xl">
                     <Briefcase size={18} className="text-slate-400" />
                     {job.jobType}
                   </div>
                 </div>
 
                 {/* Dòng 4: Vị trí (Đưa xuống dưới cùng và chiếm trọn chiều ngang) */}
-                <div className="flex items-center gap-2 text-slate-500  border border-slate-100 px-3 py-1.5 rounded-xl">
+                <div className="flex items-center gap-2 text-slate-500  px-3 py-1.5 rounded-xl">
                   <MapPin size={18} className="text-red-500 mt-0.5 shrink-0" />
                   <span className="leading-relaxed">{job.location}</span>
                 </div>

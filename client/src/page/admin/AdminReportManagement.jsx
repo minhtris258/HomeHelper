@@ -78,10 +78,10 @@ const AdminReportManagement = () => {
                     ID Bài: #{group.jobId}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800">
+                <h3 className="text-sm font-bold text-slate-800">
                   {group.jobTitle}
                 </h3>
-                <p className="text-xs text-slate-500 font-bold italic mt-1 text-blue-600">
+                <p className="text-xs text-slate-500 font-bold italic mt-1 ">
                   ID Chủ nhà: #{group.ownerId}
                 </p>
               </div>

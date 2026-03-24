@@ -220,7 +220,7 @@ const OwnerProfile = () => {
               <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-2 tracking-widest">Tiểu sử / Giới thiệu</label>
               <textarea rows="4" className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none font-bold text-slate-700 transition-all resize-none" value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} placeholder="Hãy chia sẻ một chút về bản thân..." />
             </div>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-100 flex items-center justify-center gap-2 uppercase tracking-[3px] transition-all">
+            <button className="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-100 flex items-center justify-center gap-2 uppercase tracking-[3px] transition-all">
               <Save size={20} /> Lưu hồ sơ
             </button>
           </form>
@@ -246,7 +246,7 @@ const OwnerProfile = () => {
               <label className="block text-xs font-black text-slate-400 uppercase mb-2 ml-2 tracking-widest">Xác nhận mật khẩu</label>
               <input type="password" required className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-purple-500 rounded-2xl outline-none font-bold transition-all" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} />
             </div>
-            <button className="w-full bg-[#3a1a7e] hover:bg-[#2d1463] text-white font-black py-5 rounded-2xl shadow-xl shadow-purple-100 flex items-center justify-center gap-2 uppercase tracking-[3px] transition-all">
+            <button className="w-full text-xs bg-[#3a1a7e] hover:bg-[#2d1463] text-white font-black py-5 rounded-2xl shadow-xl shadow-purple-100 flex items-center justify-center gap-2 uppercase tracking-[3px] transition-all">
               <Lock size={20} /> Xác nhận thay đổi
             </button>
           </form>
