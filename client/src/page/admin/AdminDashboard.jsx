@@ -47,7 +47,7 @@ const AdminDashboard = () => {
 
     // Khởi tạo kết nối SignalR
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5055/notificationHub")
+      .withUrl("https://homehelperapi-fxdqcbesg9gyc0f3.southeastasia-01.azurewebsites.net/notificationHub")
       .withAutomaticReconnect()
       .build();
 
