@@ -6,6 +6,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Text;
 using server.Hubs;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);

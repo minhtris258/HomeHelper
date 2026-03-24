@@ -22,6 +22,6 @@ namespace server.Models
         
         public string Bio { get; set; } = string.Empty; // Giới thiệu bản thân
         
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

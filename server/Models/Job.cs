@@ -28,7 +28,7 @@ namespace server.Models
         public string AgeReq { get; set; } = string.Empty; 
         public string RequiredSkills { get; set; } = string.Empty; 
         
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation property: Một công việc có nhiều đơn ứng tuyển
         public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
