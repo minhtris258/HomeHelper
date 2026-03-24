@@ -9,17 +9,24 @@ import JobCard from "../components/JobCard";
 const Home = () => {
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // KHAI BÁO navigate TẠI ĐÂY
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
       try {
         const response = await api.get("/Job");
-        setFeaturedJobs(response.data.slice(0, 10));
+
+        // SỬA TẠI ĐÂY: Ép kiểu mảng an toàn
+        const dataArray = Array.isArray(response.data)
+          ? response.data
+          : response.data?.$values || [];
+
+        setFeaturedJobs(dataArray.slice(0, 10));
       } catch (error) {
         console.error("Lỗi khi tải job đề xuất:", error);
+        setFeaturedJobs([]); // Trả về mảng rỗng để không lỗi .length
       } finally {
         setLoading(false);
       }
@@ -40,18 +47,30 @@ const Home = () => {
                 <Sparkles className="text-yellow-500" />
                 Việc làm nổi bật
               </h2>
-              <p className="text-slate-500 mt-2 font-medium">Những cơ hội việc làm tốt nhất dành cho bạn hôm nay.</p>
+              <p className="text-slate-500 mt-2 font-medium">
+                Những cơ hội việc làm tốt nhất dành cho bạn hôm nay.
+              </p>
             </div>
-            <Link to="/jobs" className="group flex items-center gap-1 text-blue-600 font-bold hover:text-blue-700 transition">
-              Xem tất cả {featuredJobs.length > 0 && `(${featuredJobs.length}+)`}
-              <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            <Link
+              to="/jobs"
+              className="group flex items-center gap-1 text-blue-600 font-bold hover:text-blue-700 transition"
+            >
+              Xem tất cả{" "}
+              {featuredJobs.length > 0 && `(${featuredJobs.length}+)`}
+              <ChevronRight
+                size={20}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </Link>
           </div>
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-40 bg-white rounded-2xl animate-pulse border border-slate-100"></div>
+                <div
+                  key={i}
+                  className="h-40 bg-white rounded-2xl animate-pulse border border-slate-100"
+                ></div>
               ))}
             </div>
           ) : featuredJobs.length > 0 ? (
@@ -61,18 +80,23 @@ const Home = () => {
                   key={job.id}
                   job={job}
                   // BÂY GIỜ navigate ĐÃ HOẠT ĐỘNG
-                  onClick={(j) => navigate(`/job-detail?id=${j.id}`)} 
+                  onClick={(j) => navigate(`/job-detail?id=${j.id}`)}
                 />
               ))}
             </div>
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-              <p className="text-slate-400">Hiện chưa có công việc nào được đăng tải.</p>
+              <p className="text-slate-400">
+                Hiện chưa có công việc nào được đăng tải.
+              </p>
             </div>
           )}
 
           <div className="mt-12 text-center">
-            <Link to="/jobs" className="inline-block bg-white text-slate-800 font-bold px-10 py-4 rounded-2xl border-2 border-slate-100 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm">
+            <Link
+              to="/jobs"
+              className="inline-block bg-white text-slate-800 font-bold px-10 py-4 rounded-2xl border-2 border-slate-100 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm"
+            >
               Khám phá thêm hàng ngàn việc làm khác
             </Link>
           </div>

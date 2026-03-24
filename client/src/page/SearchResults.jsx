@@ -27,9 +27,16 @@ const SearchResults = () => {
       const response = await api.get("/Job", {
         params: { keyword, location, minSalary, jobType, serviceType },
       });
-      setJobs(response.data);
+
+      // SỬA TẠI ĐÂY
+      const dataArray = Array.isArray(response.data)
+        ? response.data
+        : response.data?.$values || [];
+
+      setJobs(dataArray);
     } catch (err) {
       console.error("Lỗi tải dữ liệu:", err);
+      setJobs([]);
     } finally {
       setLoading(false);
     }

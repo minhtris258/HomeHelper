@@ -48,7 +48,13 @@ const JobDetail = () => {
       setLoading(true);
       try {
         const response = await api.get(`/Job/${jobId}`);
-        setJob(response.data);
+
+        // SỬA TẠI ĐÂY: Lấy object trực tiếp hoặc từ $values nếu bị bọc
+        const jobData = response.data?.$values
+          ? response.data.$values[0]
+          : response.data;
+
+        setJob(jobData);
       } catch (error) {
         console.error("Lỗi tải chi tiết:", error);
         toast.error("Không thể tải thông tin công việc.");
