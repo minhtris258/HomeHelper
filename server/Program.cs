@@ -49,15 +49,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // 4. BẬT GIAO DIỆN SWAGGER
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeHelper API V1");
-        c.RoutePrefix = "swagger"; // Để vào bằng link /swagger
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HomeHelper API V1");
+    c.RoutePrefix = "swagger"; 
+});
 
 
 // THỨ TỰ CỰC KỲ QUAN TRỌNG: Phải đặt sau UseCors và trước MapControllers
