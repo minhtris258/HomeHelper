@@ -1,10 +1,12 @@
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["server/server.csproj", "server/"]
-RUN dotnet restore "server/server.csproj"
+
+# Vì Dockerfile nằm cùng cấp với server.csproj, ta copy trực tiếp
+COPY ["server.csproj", "./"]
+RUN dotnet restore "server.csproj"
+
 COPY . .
-WORKDIR "/src/server"
 RUN dotnet build "server.csproj" -c Release -o /app/build
 
 # Stage 2: Publish
@@ -15,7 +17,10 @@ RUN dotnet publish "server.csproj" -c Release -o /app/publish /p:UseAppHost=fals
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-# Render sử dụng biến môi trường PORT, ASP.NET cần nghe trên port đó
+
+# Render yêu cầu port 10000
 ENV ASPNETCORE_URLS=http://+:10000
 EXPOSE 10000
+
+# Tên file dll dựa theo tên project server.csproj của bạn
 ENTRYPOINT ["dotnet", "server.dll"]
