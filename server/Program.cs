@@ -41,7 +41,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        policy => policy.WithOrigins("https://home-helper-seven.vercel.app").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 });
 
 var app = builder.Build();
